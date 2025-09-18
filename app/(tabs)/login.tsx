@@ -1,39 +1,38 @@
 import { useState, useEffect } from "react";
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { supabase } from "../../supabase";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState<any>(null);
 
-  // ログイン状態を監視
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const session = supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
     });
-    return unsubscribe;
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const signup = async () => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (e: any) {
-      alert(e.message);
-    }
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) alert(error.message);
   };
 
   const login = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (e: any) {
-      alert(e.message);
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) alert(error.message);
   };
 
   const logout = async () => {
-    await signOut(auth);
+    await supabase.auth.signOut();
   };
 
   return (
