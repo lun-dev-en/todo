@@ -1,27 +1,22 @@
 import { useState } from "react";
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from "react-native";
 
-type Props = {
-  onAdd: (text: string) => void;
-};
-
-export default function TodoInput({ onAdd }: Props) {
+export default function TodoInput({ onAdd }: { onAdd: (text: string) => void }) {
   const [text, setText] = useState("");
 
   const handleAdd = () => {
-    if (text.trim().length > 0) {
-      onAdd(text);
-      setText("");
-    }
+    if (!text.trim()) return;
+    onAdd(text.trim());
+    setText("");
   };
 
   return (
     <View style={styles.container}>
       <TextInput
-        style={styles.input}
+        placeholder="タスクを入力"
         value={text}
-        placeholder="新しいタスクを入力"
         onChangeText={setText}
+        style={styles.input}
       />
       <TouchableOpacity style={styles.button} onPress={handleAdd}>
         <Text style={styles.buttonText}>追加</Text>
@@ -31,23 +26,20 @@ export default function TodoInput({ onAdd }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flexDirection: "row", margin: 10 },
+  container: { flexDirection: "row", marginBottom: 10, paddingHorizontal: 10 },
   input: {
     flex: 1,
     borderWidth: 1,
     borderColor: "#ccc",
-    marginRight: 10,
-    padding: 8,
+    padding: 10,
     borderRadius: 5,
   },
   button: {
-    backgroundColor: "#1E90FF", // ブルー
-    paddingVertical: 10,
+    marginLeft: 10,
+    backgroundColor: "#1E90FF",
     paddingHorizontal: 15,
+    justifyContent: "center",
     borderRadius: 5,
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  buttonText: { color: "#fff", fontWeight: "bold" },
 });
